@@ -4,7 +4,7 @@ recognition.lang = "en-US";
 const btn = document.querySelector("#listen-btn");
 
 // Attach click event listener to the button
-btn.addEventListener("click", function () {
+  function test () {
   // Function to convert text to speech
   function speak(text) {
     const utterance = new SpeechSynthesisUtterance(text); // SpeechSynthesisUtterance(text) -> coverts text to speech
@@ -47,7 +47,7 @@ btn.addEventListener("click", function () {
     btn.innerHTML = "Listening...👂";
     btn.classList.add("listening");
     recognition.start();
-  }, 2500);
+  }, 2000);
 
   // When a result is received
   recognition.onresult = (event) => {
@@ -62,4 +62,35 @@ btn.addEventListener("click", function () {
     btn.classList.remove("listening");
   };
 
+};
+
+window.onload = () => {
+  try {
+    // Assuming 'transcript' is coming from a speech recognition setup
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.continuous = true; // Set to true for continuous recognition
+    recognition.start();
+
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("Transcript:", transcript);
+
+      if (transcript.toLowerCase().includes("hey siri")) {
+        test(); // Your custom function
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Recognition error:", event.error);
+    };
+
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+btn.addEventListener("click", () => {
+  test();
 });
