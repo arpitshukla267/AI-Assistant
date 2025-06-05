@@ -13,32 +13,48 @@ const btn = document.querySelector("#listen-btn");
   }
 
   // Function to handle recognized commands
-  function handleCommand(command) {
-    if (command.includes("open youtube")) {
-      speak("Opening YouTube...");
-      window.open("https://www.youtube.com", "_blank");
-    } else if (command.includes("open google")) {
-      speak("Opening Google...");
-      window.open("https://www.google.com", "_blank");
-    } else if (command.includes("open facebook")) {
-      speak("Opening Facebook...");
-      window.open("https://www.facebook.com", "_blank");
-    } else if (command.includes("open instagram")) {
-      speak("Opening Instagram...");
-      window.open("https://www.instagram.com", "_blank");
-    } else if (command.includes("open whatsapp")) {
-      speak("Opening WhatsApp...");
-      window.open("https://www.whatsapp.com", "_blank");
-    } else {
-      // Perform a Google search if command not recognized
-      speak("Searching Google for " + command);
-      window.open(
-        `https://www.google.com/search?q=${encodeURIComponent(command)}`,
-        "_blank"
-      );
-    }
-  }
+function handleCommand(command) {
+  if (command.startsWith("open ")) {
+    // Extract the word after "open"
+    const site = command.split("open ")[1].trim().replace(/\s+/g, "");
+    let url = "";
 
+    // Map common site names to URLs
+    switch (site) {
+      case "youtube":
+        url = "https://www.youtube.com";
+        break;
+      case "google":
+        url = "https://www.google.com";
+        break;
+      case "facebook":
+        url = "https://www.facebook.com";
+        break;
+      case "instagram":
+        url = "https://www.instagram.com";
+        break;
+      case "whatsapp":
+        url = "https://www.whatsapp.com";
+        break;
+      case "netflix":
+        url = "https://www.netflix.com";
+        break;
+      default:
+        // Try to open the site as a .com if not in the list
+        url = `https://www.${site}.com`;
+    }
+
+    speak(`Opening ${site}...`);
+    window.open(url, "_blank");
+  } else {
+    // Perform a Google search if command not recognized
+    speak("Searching Google for " + command);
+    window.open(
+      `https://www.google.com/search?q=${encodeURIComponent(command)}`,
+      "_blank"
+    );
+  }
+}
   // Greet the user and then start listening
   speak("Hello, how can I help you?");
 
