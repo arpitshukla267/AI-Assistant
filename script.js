@@ -1,60 +1,71 @@
 // Speech recognition setup
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)(); //it creates a new instance of the SpeechRecognition object, which is used for speech recognition in web applications.
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.lang = "en-US";
 const btn = document.querySelector("#listen-btn");
 
 // Attach click event listener to the button
-  function test () {
+function test() {
   // Function to convert text to speech
   function speak(text) {
-    const utterance = new SpeechSynthesisUtterance(text); // SpeechSynthesisUtterance(text) -> coverts text to speech
-    utterance.lang = "en-US"; // Set the language for the speech synthesis
-    window.speechSynthesis.speak(utterance); // window.speechSynthesis.speak(utterance) -> speaks the text using the speech synthesis API
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    window.speechSynthesis.speak(utterance);
   }
 
-  // Function to handle recognized commands
-function handleCommand(command) {
-  if (command.startsWith("open ")) {
-    // Extract the word after "open"
-    const site = command.split("open ")[1].trim().replace(/\s+/g, "");
-    let url = "";
+  // Enhanced command handler
+  function handleCommand(command) {
+    const lowerCmd = command.toLowerCase();
 
-    // Map common site names to URLs
-    switch (site) {
-      case "youtube":
-        url = "https://www.youtube.com";
-        break;
-      case "google":
-        url = "https://www.google.com";
-        break;
-      case "facebook":
-        url = "https://www.facebook.com";
-        break;
-      case "instagram":
-        url = "https://www.instagram.com";
-        break;
-      case "whatsapp":
-        url = "https://www.whatsapp.com";
-        break;
-      case "netflix":
-        url = "https://www.netflix.com";
-        break;
-      default:
-        // Try to open the site as a .com if not in the list
-        url = `https://www.${site}.com`;
+    // Regex to extract all words after "open" (handles multiple)
+    const openRegex = /open\s+([a-zA-Z0-9.\s]+(?:\sand\s[a-zA-Z0-9.\s]+)*)/;
+    const match = lowerCmd.match(openRegex);
+
+    if (match) {
+      const rawSites = match[1]
+        .replace(/,/g, "")
+        .replace(/\sand\s/g, " ")
+        .split(/\s+/);
+
+      rawSites.forEach((siteRaw) => {
+        const site = siteRaw.trim().toLowerCase();
+        if (!site) return;
+
+        let url = "";
+
+        switch (site) {
+          case "youtube":
+            url = "https://www.youtube.com";
+            break;
+          case "google":
+            url = "https://www.google.com";
+            break;
+          case "facebook":
+            url = "https://www.facebook.com";
+            break;
+          case "instagram":
+            url = "https://www.instagram.com";
+            break;
+          case "whatsapp":
+            url = "https://www.whatsapp.com";
+            break;
+          case "netflix":
+            url = "https://www.netflix.com";
+            break;
+          default:
+            // If contains a dot, treat as full domain
+            url = site.includes(".") ? `https://${site}` : `https://www.${site}.com`;
+        }
+
+        speak(`Opening ${site}...`);
+        window.open(url, "_blank");
+      });
+
+    } else {
+      speak("Searching Google for " + command);
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(command)}`, "_blank");
     }
-
-    speak(`Opening ${site}...`);
-    window.open(url, "_blank");
-  } else {
-    // Perform a Google search if command not recognized
-    speak("Searching Google for " + command);
-    window.open(
-      `https://www.google.com/search?q=${encodeURIComponent(command)}`,
-      "_blank"
-    );
   }
-}
+
   // Greet the user and then start listening
   speak("Hello, how can I help you?");
 
@@ -67,34 +78,31 @@ function handleCommand(command) {
 
   // When a result is received
   recognition.onresult = (event) => {
-    console.log(event);
     const command = event.results[0][0].transcript.toLowerCase();
+    console.log("Recognized Command:", command);
     handleCommand(command);
   };
 
-  // When recognition ends
   recognition.onend = () => {
     btn.innerHTML = "Start Listening";
     btn.classList.remove("listening");
   };
+}
 
-};
-
+// Hotword trigger on load
 window.onload = () => {
   try {
-    // Assuming 'transcript' is coming from a speech recognition setup
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = "en-US";
-    recognition.continuous = true; // Set to true for continuous recognition
+    recognition.continuous = true;
     recognition.start();
-
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       console.log("Transcript:", transcript);
 
       if (transcript.toLowerCase().includes("hey siri")) {
-        test(); // Your custom function
+        test();
       }
     };
 
@@ -107,6 +115,7 @@ window.onload = () => {
   }
 };
 
+// Manual button trigger
 btn.addEventListener("click", () => {
   test();
 });
